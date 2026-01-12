@@ -1,0 +1,150 @@
+body {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* Hide scrollbar but allow scrolling */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-up-animation {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Safe Area for iPhones without home button */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Add inside your <style> tag */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- CALENDAR STYLES --- */
+        .fc-event, .fc-event-main { border: none !important; background: transparent !important; box-shadow: none !important; }
+        .event-bubble { border-radius: 6px; padding: 2px 4px; font-size: 9px; font-weight: 800; text-align: center; width: 100%; display: block; margin-top: 2px; }
+        .bubble-high { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
+        .bubble-low { background: #d1fae5; color: #059669; border: 1px solid #6ee7b7; }
+        .fc-toolbar-title { font-size: 14px !important; font-weight: bold; color: #334155; }
+        .fc-button { font-size: 10px !important; padding: 4px 8px !important; background-color: #f1f5f9 !important; border: none !important; color: #64748b !important; }
+        .fc-button-active { background-color: #cbd5e1 !important; color: #1e293b !important; }
+        .fc-daygrid-day-number { font-size: 10px; color: #94a3b8; font-weight: 600; text-decoration: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- DARK MODE OVERRIDES --- */
+        body.dark-mode { background-color: #0f172a !important; color: #f8fafc !important; }
+        body.dark-mode .bg-white { background-color: #1e293b !important; border-color: #334155 !important; color: #f8fafc !important; }
+        body.dark-mode .bg-slate-100, body.dark-mode .bg-slate-50 { background-color: #334155 !important; color: #f8fafc !important; border-color: #475569 !important; }
+        body.dark-mode .text-slate-800, body.dark-mode .text-slate-700, body.dark-mode .text-slate-600 { color: #f1f5f9 !important; }
+        body.dark-mode .text-slate-500, body.dark-mode .text-slate-400 { color: #cbd5e1 !important; }
+        body.dark-mode input, body.dark-mode select { background-color: #334155 !important; color: white !important; border-color: #475569 !important; }
+        body.dark-mode nav { background-color: rgba(15, 23, 42, 0.95) !important; border-top-color: #334155 !important; }
+        body.dark-mode .fc .fc-toolbar-title { color: #ffffff !important; }
+        body.dark-mode .fc-button { background-color: #334155 !important; color: #f8fafc !important; }
+        body.dark-mode .fc-button-active { background-color: #475569 !important; }
+        body.dark-mode .fc-theme-standard th { background-color: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        body.dark-mode .fc-col-header-cell-cushion { color: #f8fafc !important; }
+        body.dark-mode .bubble-high { background-color: #7f1d1d !important; color: #fecaca !important; border-color: #991b1b !important; }
+        body.dark-mode .bubble-low { background-color: #064e3b !important; color: #6ee7b7 !important; border-color: #065f46 !important; }
+        
+        /* Navigation Dark Mode */
+        body.dark-mode .nav-bg-shape { color: #1e293b !important; }
+		
+    /* =========================================
+       DARK MODE OVERRIDES (THE FIXES) 
+       ========================================= */
+    body.dark-mode {
+        background-color: #0f172a !important; /* Dark Blue Background */
+        color: #f8fafc !important; /* White Text */
+    }
+
+    /* 1. Fix Cards & Main Containers */
+    body.dark-mode .bg-white {
+        background-color: #1e293b !important; /* Slate-800 */
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    /* 2. Fix Text Colors */
+    body.dark-mode .text-slate-800,
+    body.dark-mode .text-slate-700,
+    body.dark-mode .text-slate-600 {
+        color: #f1f5f9 !important;
+    }
+    body.dark-mode .text-slate-500,
+    body.dark-mode .text-slate-400 {
+        color: #cbd5e1 !important; /* Lighten muted text */
+    }
+
+    /* 3. Fix Inputs & Selects */
+    body.dark-mode input, 
+    body.dark-mode select {
+        background-color: #334155 !important;
+        color: white !important;
+        border-color: #475569 !important;
+    }
+
+    /* 4. Fix Tab Buttons (White Block Issue) */
+    body.dark-mode .bg-slate-100, 
+    body.dark-mode .bg-slate-50 {
+        background-color: #334155 !important; 
+        color: #f8fafc !important;
+        border-color: #475569 !important;
+    }
+
+    /* 5. Fix Bottom Nav */
+    body.dark-mode nav {
+        background-color: rgba(15, 23, 42, 0.95) !important;
+        border-top-color: #334155 !important;
+    }
+
+    /* 6. FIX CALENDAR TITLE (Specific Fix for January 2026) */
+    body.dark-mode .fc .fc-toolbar-title {
+        color: #ffffff !important; 
+    }
+
+    /* 7. Fix Calendar Buttons (< >) */
+    body.dark-mode .fc-button {
+        background-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+    body.dark-mode .fc-button-active {
+        background-color: #475569 !important;
+    }
+
+    /* 8. Fix Calendar Headers (Sun, Mon...) */
+    body.dark-mode .fc-theme-standard th {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #e2e8f0 !important;
+    }
+    body.dark-mode .fc-col-header-cell-cushion {
+        color: #f8fafc !important;
+    }
+
+    /* 9. Fix Bubbles in Dark Mode */
+    body.dark-mode .bubble-high {
+        background-color: #7f1d1d !important;
+        color: #fecaca !important;
+        border-color: #991b1b !important;
+    }
+    body.dark-mode .bubble-low {
+        background-color: #064e3b !important;
+        color: #6ee7b7 !important;
+        border-color: #065f46 !important;
+    }
