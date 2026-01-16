@@ -9,7 +9,7 @@ let myChart = null;
 let calendar = null;
 
 // CHANGE: Your API Base URL
-const API_URL = "http://192.168.0.105/RinggitTrack/api"; 
+const API_URL = "http://192.168.0.10/RinggitTrack/api";
 
 // Unified Initialization
 document.addEventListener('DOMContentLoaded', () => {
@@ -278,7 +278,7 @@ function saveBudget() {
 
     console.log("Sending budget update...", payload); // DEBUG LOG
 
-    fetch(`http://192.168.0.105/RinggitTrack/api/budget.php?action=add`, {
+    fetch(`http://192.168.0.10/RinggitTrack/api/budget.php?action=add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -691,22 +691,58 @@ function getGeo() {
             const res = await fetch(`${API_URL}/get_address.php?lat=${lat}&lng=${lng}`);
             const data = await res.json();
             
+            console.log("Address Data:", data); // Keep this for debugging
+
+            // 1. Try specific building/place names first
             let simpleName = data.address.amenity || 
                              data.address.shop || 
                              data.address.building || 
-                             data.address.road || "Pinned Location";
+                             data.address.office ||
+                             data.address.tourism;
 
+            // 2. If no building, try street/road names
+            if (!simpleName) {
+                if (data.address.road) {
+                    simpleName = data.address.road;
+                    if (data.address.house_number) {
+                        simpleName = data.address.house_number + " " + simpleName;
+                    }
+                }
+            }
+
+            // 3. If no road, try area names (This fixes your issue!)
+            if (!simpleName) {
+                 simpleName = data.address.hamlet || 
+                              data.address.village || 
+                              data.address.suburb || 
+                              data.address.residential ||
+                              data.address.city_district ||
+                              data.address.city;
+            }
+
+            // 4. Absolute Fallback: Use the first part of the full display name
+            if (!simpleName && data.display_name) {
+                simpleName = data.display_name.split(',')[0]; 
+            }
+
+            // 5. Final safety net
+            if (!simpleName) {
+                simpleName = "Pinned Location";
+            }
+
+            // Update UI
             document.getElementById('geoAddress').value = simpleName; 
-            geoText.textContent = simpleName; 
-            geoText.className = "text-[10px] text-indigo-600 font-bold truncate block w-full";
+            document.getElementById('geoText').textContent = simpleName; 
+            document.getElementById('geoText').className = "text-[10px] text-indigo-600 font-bold truncate block w-full";
 
         } catch (e) { 
-            console.error(e);
+            console.error("Geo Error:", e);
             document.getElementById('geoAddress').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`; 
-            geoText.textContent = "Location Saved (No Address)"; 
+            document.getElementById('geoText').textContent = "Location Saved (Coords Only)"; 
         }
     }, (error) => {
         geoText.textContent = "GPS Error";
+        console.error("GPS Error:", error);
     });
 }
 

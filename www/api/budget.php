@@ -1,125 +1,68 @@
 <?php
-// ===============================
-// DEBUG MODE (REMOVE IN PRODUCTION)
-// ===============================
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// 1. DISABLE HTML ERROR REPORTING (Prevents the "<br /> <b>" error)
+error_reporting(0); 
+ini_set('display_errors', 0);
 
-// ===============================
-// CORS + HEADERS (IMPORTANT)
-// ===============================
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type");
-    exit(0);
-}
-
+// 2. HEADERS
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// ===============================
-// DB CONNECTION
-// ===============================
-require_once __DIR__ . '/db.php';
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit(); }
 
-$action = $_GET['action'] ?? '';
+// 3. LOG ERRORS TO FILE (Check debug_log.txt if this fails)
+ini_set('log_errors', 1);
+ini_set('error_log', 'debug_log.txt');
 
-// ===============================
-// 1. FETCH BUDGET HISTORY
-// ===============================
-if ($action === 'fetch') {
+include 'db.php';
 
-	//reset every month
-    $sql = "
-		SELECT * FROM budget_topups
-		WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
-		AND YEAR(created_at) = YEAR(CURRENT_DATE())
-		ORDER BY created_at DESC
-";
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+$method = $_SERVER['REQUEST_METHOD'];
 
-    $result = $conn->query($sql);
-
-    $history = [];
-
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $history[] = $row;
-        }
-    } else {
-        http_response_code(500);
-        echo json_encode([
-            "status" => "error",
-            "message" => $conn->error
-        ]);
-        exit;
-    }
-
-    echo json_encode($history);
-    exit;
-}
-
-// ===============================
-// 2. ADD BUDGET TOP-UP
-// ===============================
-if ($action === 'add') {
-
+// --- ADD BUDGET ---
+if ($action === 'add' && $method === 'POST') {
     $raw = file_get_contents("php://input");
     $data = json_decode($raw, true);
 
-    if (!isset($data['amount']) || $data['amount'] <= 0) {
-        http_response_code(400);
-        echo json_encode([
-            "status" => "error",
-            "message" => "Invalid amount"
-        ]);
-        exit;
+    if (!isset($data['amount'])) {
+        echo json_encode(["status" => "error", "message" => "No amount provided"]);
+        exit();
     }
 
     $amount = (float)$data['amount'];
-
-    $stmt = $conn->prepare(
-        "INSERT INTO budget_topups (amount, created_at) VALUES (?, NOW())"
-    );
-
+    
+    // Using 'budget_topups' table based on your SQL
+    $stmt = $conn->prepare("INSERT INTO budget_topups (amount, created_at) VALUES (?, NOW())");
+    
     if (!$stmt) {
-        http_response_code(500);
-        echo json_encode([
-            "status" => "error",
-            "message" => $conn->error
-        ]);
-        exit;
+        // Log the specific SQL error to debug_log.txt
+        error_log("Prepare failed: " . $conn->error);
+        echo json_encode(["status" => "error", "message" => "Database error (Check debug_log.txt)"]);
+        exit();
     }
 
     $stmt->bind_param("d", $amount);
 
     if ($stmt->execute()) {
-        echo json_encode([
-            "status" => "success",
-            "insert_id" => $stmt->insert_id
-        ]);
+        echo json_encode(["status" => "success"]);
     } else {
-        http_response_code(500);
-        echo json_encode([
-            "status" => "error",
-            "message" => $stmt->error
-        ]);
+        error_log("Execute failed: " . $stmt->error);
+        echo json_encode(["status" => "error", "message" => "Save failed"]);
     }
-
-    $stmt->close();
-    exit;
+    exit();
 }
 
+// --- FETCH BUDGET ---
+if ($action === 'fetch') {
+    $result = $conn->query("SELECT * FROM budget_topups ORDER BY created_at DESC");
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+    echo json_encode($data);
+    exit();
+}
 
-
-
-// ===============================
-// INVALID ACTION
-// ===============================
-http_response_code(400);
-echo json_encode([
-    "status" => "error",
-    "message" => "Invalid action"
-]);
+echo json_encode(["status" => "error", "message" => "Invalid Action"]);
+?>
